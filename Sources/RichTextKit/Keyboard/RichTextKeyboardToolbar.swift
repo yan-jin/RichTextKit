@@ -113,17 +113,14 @@ public struct RichTextKeyboardToolbar<LeadingButtons: View, TrailingButtons: Vie
 
     public var body: some View {
         if #available(iOS 26.0, *) {
-            VStack(spacing: 0) {
-                GlassEffectContainer(spacing: 10.0) {
-                    HStack(spacing: style.itemSpacing) {
-                        leadingViews
-                        centerViews
-                        trailingViews
-                    }
-                    
+            GlassEffectContainer(spacing: 20.0) {
+                HStack(spacing: style.itemSpacing) {
+                    leadingViews
+                    centerViews
+                    trailingViews
                 }
             }
-            //.environment(\.sizeCategory, .medium)
+            .environment(\.sizeCategory, .medium)
             .frame(height: style.toolbarHeight)
             //.overlay(Divider(), alignment: .bottom)
             .accentColor(.primary)
@@ -137,7 +134,7 @@ public struct RichTextKeyboardToolbar<LeadingButtons: View, TrailingButtons: Vie
             )
             .opacity(shouldDisplayToolbar ? 1 : 0)
             //.offset(y: shouldDisplayToolbar ? 0 : style.toolbarHeight)
-            //.frame(height: shouldDisplayToolbar ? nil : 0)
+            .frame(height: shouldDisplayToolbar ? nil : 0)
             .sheet(isPresented: $isFormatSheetPresented) {
                 formatSheet(
                     .init(context: context)
@@ -167,7 +164,7 @@ public struct RichTextKeyboardToolbar<LeadingButtons: View, TrailingButtons: Vie
             )
             .opacity(shouldDisplayToolbar ? 1 : 0)
             //.offset(y: shouldDisplayToolbar ? 0 : style.toolbarHeight)
-            //.frame(height: shouldDisplayToolbar ? nil : 0)
+            .frame(height: shouldDisplayToolbar ? nil : 0)
             .sheet(isPresented: $isFormatSheetPresented) {
                 formatSheet(
                     .init(context: context)
@@ -210,11 +207,19 @@ private extension RichTextKeyboardToolbar {
 
     @ViewBuilder
     var leadingViews: some View {
-        RichTextAction.ButtonStack(
-            context: context,
-            actions: config.leadingActions,
-            spacing: style.itemSpacing
-        )
+        HStack(spacing: style.itemSpacing) {
+            ForEach(config.leadingActions) { action in
+                RichTextAction.Button(
+                    action: action,
+                    context: context,
+                    fillVertically: true
+                )
+                .padding()
+                .frame(maxHeight: .infinity)
+                .conditionalGlassEffect(id: "toolbar", namespace: namespace)
+            }
+        }
+        .fixedSize(horizontal: false, vertical: true)
 
         leadingButtons(StandardLeadingButtons())
     }
@@ -226,12 +231,22 @@ private extension RichTextKeyboardToolbar {
                Image.richTextFormat
                    .contentShape(Rectangle())
            }
+           .conditionalGlassEffect(id: "toolbar", namespace: namespace)
         }
-           RichTextStyle.ToggleStack(context: context)
-               .keyboardShortcutsOnly(if: isCompact)
-
-           RichTextFont.SizePickerStack(context: context)
-               .keyboardShortcutsOnly()
+        
+        // Custom style toggle stack with glass effect on individual toggles
+        HStack(spacing: 5) {
+            ForEach(RichTextStyle.allCases) { style in
+                RichTextStyle.Toggle(
+                    style: style,
+                    context: context,
+                    fillVertically: true
+                )
+                .conditionalGlassEffect(id: "toolbar", namespace: namespace)
+            }
+        }
+        .fixedSize(horizontal: false, vertical: true)
+        .keyboardShortcutsOnly(if: isCompact)
     }
 
     @ViewBuilder
@@ -252,11 +267,18 @@ private extension RichTextKeyboardToolbar {
 
         trailingButtons(StandardTrailingButtons())
 
-        RichTextAction.ButtonStack(
-            context: context,
-            actions: config.trailingActions,
-            spacing: style.itemSpacing
-        )
+        HStack(spacing: style.itemSpacing) {
+            ForEach(config.trailingActions) { action in
+                RichTextAction.Button(
+                    action: action,
+                    context: context,
+                    fillVertically: true
+                )
+                .frame(maxHeight: .infinity)
+                .conditionalGlassEffect(id: "toolbar", namespace: namespace)
+            }
+        }
+        .fixedSize(horizontal: false, vertical: true)
     }
 }
 
@@ -269,6 +291,17 @@ private extension View {
         if condition {
             self.hidden()
                 .frame(width: 0)
+        } else {
+            self
+        }
+    }
+    
+    @ViewBuilder
+    func conditionalGlassEffect(id: String, namespace: Namespace.ID) -> some View {
+        if #available(iOS 26.0, *) {
+            self.glassEffect(.regular.interactive())
+                .glassEffectUnion(id: id, namespace: namespace)
+            
         } else {
             self
         }
