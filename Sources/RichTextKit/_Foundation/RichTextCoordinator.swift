@@ -75,7 +75,9 @@ open class RichTextCoordinator: NSObject {
     // MARK: - UITextViewDelegate
 
     open func textViewDidBeginEditing(_ textView: UITextView) {
-        context.isEditingText = true
+        DispatchQueue.main.async { [weak self] in
+            self?.context.isEditingText = true
+        }
     }
 
     open func textViewDidChange(_ textView: UITextView) {
@@ -88,7 +90,9 @@ open class RichTextCoordinator: NSObject {
 
     open func textViewDidEndEditing(_ textView: UITextView) {
         syncWithTextView()
-        context.isEditingText = false
+        DispatchQueue.main.async { [weak self] in
+            self?.context.isEditingText = false
+        }
     }
     #endif
 
@@ -97,7 +101,9 @@ open class RichTextCoordinator: NSObject {
     // MARK: - NSTextViewDelegate
 
     open func textDidBeginEditing(_ notification: Notification) {
-        context.isEditingText = true
+        DispatchQueue.main.async { [weak self] in
+            self?.context.isEditingText = true
+        }
     }
 
     open func textDidChange(_ notification: Notification) {
@@ -110,7 +116,9 @@ open class RichTextCoordinator: NSObject {
     }
 
     open func textDidEndEditing(_ notification: Notification) {
-        context.isEditingText = false
+        DispatchQueue.main.async { [weak self] in
+            self?.context.isEditingText = false
+        }
     }
     #endif
 }

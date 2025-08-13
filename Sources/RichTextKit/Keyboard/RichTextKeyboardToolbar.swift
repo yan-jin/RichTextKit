@@ -108,33 +108,72 @@ public struct RichTextKeyboardToolbar<LeadingButtons: View, TrailingButtons: Vie
 
     @Environment(\.richTextKeyboardToolbarStyle)
     private var style
+    
+    @Namespace var namespace
 
     public var body: some View {
-        VStack(spacing: 0) {
-            HStack(spacing: style.itemSpacing) {
-                leadingViews
-                Spacer()
-                trailingViews
+        if #available(iOS 26.0, *) {
+            VStack(spacing: 0) {
+                GlassEffectContainer(spacing: 10.0) {
+                    HStack(spacing: style.itemSpacing) {
+                        leadingViews
+                        centerViews
+                        trailingViews
+                    }
+                    
+                }
             }
-            .padding(10)
-        }
-        .environment(\.sizeCategory, .medium)
-        .frame(height: style.toolbarHeight)
-        .overlay(Divider(), alignment: .bottom)
-        .accentColor(.primary)
-        .background(
-            Color.primary.colorInvert()
-                .overlay(Color.white.opacity(0.2))
-                .shadow(color: style.shadowColor, radius: style.shadowRadius, x: 0, y: 0)
-        )
-        .opacity(shouldDisplayToolbar ? 1 : 0)
-        .offset(y: shouldDisplayToolbar ? 0 : style.toolbarHeight)
-        .frame(height: shouldDisplayToolbar ? nil : 0)
-        .sheet(isPresented: $isFormatSheetPresented) {
-            formatSheet(
-                .init(context: context)
+            //.environment(\.sizeCategory, .medium)
+            .frame(height: style.toolbarHeight)
+            //.overlay(Divider(), alignment: .bottom)
+            .accentColor(.primary)
+            .background(
+                .clear
+                /*
+                Color.primary.colorInvert()
+                    .overlay(Color.white.opacity(0.2))
+                    .shadow(color: style.shadowColor, radius: style.shadowRadius, x: 0, y: 0)
+                 */
             )
-            .prefersMediumSize()
+            .opacity(shouldDisplayToolbar ? 1 : 0)
+            //.offset(y: shouldDisplayToolbar ? 0 : style.toolbarHeight)
+            //.frame(height: shouldDisplayToolbar ? nil : 0)
+            .sheet(isPresented: $isFormatSheetPresented) {
+                formatSheet(
+                    .init(context: context)
+                )
+                .prefersMediumSize()
+            }
+        } else {
+            VStack(spacing: 0) {
+                HStack(spacing: style.itemSpacing) {
+                    leadingViews
+                    centerViews
+                    trailingViews
+                }
+                .padding(10)
+            }
+            //.environment(\.sizeCategory, .medium)
+            .frame(height: style.toolbarHeight)
+            //.overlay(Divider(), alignment: .bottom)
+            .accentColor(.primary)
+            .background(
+                .clear
+                /*
+                Color.primary.colorInvert()
+                    .overlay(Color.white.opacity(0.2))
+                    .shadow(color: style.shadowColor, radius: style.shadowRadius, x: 0, y: 0)
+                 */
+            )
+            .opacity(shouldDisplayToolbar ? 1 : 0)
+            //.offset(y: shouldDisplayToolbar ? 0 : style.toolbarHeight)
+            //.frame(height: shouldDisplayToolbar ? nil : 0)
+            .sheet(isPresented: $isFormatSheetPresented) {
+                formatSheet(
+                    .init(context: context)
+                )
+                .prefersMediumSize()
+            }
         }
     }
 }
@@ -178,25 +217,26 @@ private extension RichTextKeyboardToolbar {
         )
 
         leadingButtons(StandardLeadingButtons())
-
-        divider
-
-     if config.displayFormatSheetButton {
-        Button(action: presentFormatSheet) {
-            Image.richTextFormat
-                .contentShape(Rectangle())
+    }
+    
+    @ViewBuilder
+    var centerViews: some View {
+        if config.displayFormatSheetButton {
+           Button(action: presentFormatSheet) {
+               Image.richTextFormat
+                   .contentShape(Rectangle())
+           }
         }
-     }
+           RichTextStyle.ToggleStack(context: context)
+               .keyboardShortcutsOnly(if: isCompact)
 
-        RichTextStyle.ToggleStack(context: context)
-            .keyboardShortcutsOnly(if: isCompact)
-
-        RichTextFont.SizePickerStack(context: context)
-            .keyboardShortcutsOnly()
+           RichTextFont.SizePickerStack(context: context)
+               .keyboardShortcutsOnly()
     }
 
     @ViewBuilder
     var trailingViews: some View {
+        /*
         Picker(
             forValue: \.alignment,
             in: context
@@ -208,6 +248,7 @@ private extension RichTextKeyboardToolbar {
         .pickerStyle(.segmented)
         .frame(maxWidth: 200)
         .keyboardShortcutsOnly(if: isCompact)
+         */
 
         trailingButtons(StandardTrailingButtons())
 
