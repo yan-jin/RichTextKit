@@ -37,6 +37,12 @@ public enum RichTextAction: Identifiable, Equatable, RichTextLabelValue {
     /// Paste plain text.
     case pasteText(RichTextInsertion<String>)
 
+    /// Insert a single image from album/gallery.
+    case insertImage
+
+    /// Insert multiple images from album/gallery.
+    case insertImages
+
     /// A print command.
     case print
 
@@ -109,6 +115,8 @@ public extension RichTextAction {
         case .pasteImage: .richTextDocuments
         case .pasteImages: .richTextDocuments
         case .pasteText: .richTextDocuments
+        case .insertImage: .richTextInsertImage
+        case .insertImages: .richTextInsertImages
         case .print: .richTextPrint
         case .redoLatestChange: .richTextRedo
         case .replaceSelectedText: .richTextReplace
@@ -163,6 +171,8 @@ public extension RichTextAction {
         case .pasteImage: .pasteImage
         case .pasteImages: .pasteImages
         case .pasteText: .pasteText
+        case .insertImage: .insertImage
+        case .insertImages: .insertImages
         case .print: .actionPrint
         case .redoLatestChange: .actionRedoLatestChange
         case .replaceSelectedText: .actionDelete

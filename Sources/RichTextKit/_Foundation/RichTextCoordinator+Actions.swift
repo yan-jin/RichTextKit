@@ -21,6 +21,8 @@ extension RichTextCoordinator {
         case .pasteImage(let image): pasteImage(image)
         case .pasteImages(let images): pasteImages(images)
         case .pasteText(let text): pasteText(text)
+        case .insertImage: handleInsertImage()
+        case .insertImages: handleInsertImages()
         case .print: break
         case .redoLatestChange:
             textView.redoLatestChange()
@@ -91,6 +93,28 @@ extension RichTextCoordinator {
     func setAttributedString(to newValue: NSAttributedString?) {
         guard let newValue else { return }
         textView.setRichText(newValue)
+    }
+
+    func handleInsertImage() {
+        // Note: insertImage actions are primarily designed to work with
+        // UI components like RichTextAction.ImageButton that show PhotosPicker.
+        // For programmatic use, consider using pasteImage with image data instead.
+        #if iOS || os(visionOS)
+        if #available(iOS 16.0, visionOS 1.0, *) {
+            imagePickerManager.showImagePicker(for: .single, context: context)
+        }
+        #endif
+    }
+
+    func handleInsertImages() {
+        // Note: insertImages actions are primarily designed to work with
+        // UI components like RichTextAction.ImageButton that show PhotosPicker.
+        // For programmatic use, consider using pasteImages with image data instead.
+        #if iOS || os(visionOS)
+        if #available(iOS 16.0, visionOS 1.0, *) {
+            imagePickerManager.showImagePicker(for: .multiple, context: context)
+        }
+        #endif
     }
 
     // TODO: This code should be handled by the component

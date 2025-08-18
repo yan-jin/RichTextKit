@@ -71,6 +71,8 @@ public enum RTKL10n: String, CaseIterable, Identifiable {
     pasteImage,
     pasteImages,
     pasteText,
+    insertImage,
+    insertImages,
     selectRange,
 
     setAttributedString,

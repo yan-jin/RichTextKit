@@ -27,6 +27,8 @@ public extension RichTextContext {
         case .pasteImage: true
         case .pasteImages: true
         case .pasteText: true
+        case .insertImage: true
+        case .insertImages: true
         case .print: false
         case .redoLatestChange: canRedoLatestChange
         case .replaceSelectedText: hasSelectedRange

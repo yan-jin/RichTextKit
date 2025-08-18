@@ -66,6 +66,8 @@
 "pasteImage" = "Paste Image";
 "pasteImages" = "Paste Images";
 "pasteText" = "Paste text";
+"insertImage" = "Insert Image";
+"insertImages" = "Insert Images";
 "selectRange" = "Select Range";
 "setAttributedString" = "Set attributed String";
 
