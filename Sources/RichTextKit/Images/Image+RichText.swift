@@ -46,6 +46,9 @@ public extension Image {
 
     static let richTextIndentDecrease = symbol("decrease.indent")
     static let richTextIndentIncrease = symbol("increase.indent")
+    
+    static let richTextInsertImage = symbol("photo")
+    static let richTextInsertImages = symbol("photo.on.rectangle")
 
     static let richTextLineSpacing = symbol("arrow.up.and.down.text.horizontal")
     static let richTextLineSpacingDecrease = symbol("minus")

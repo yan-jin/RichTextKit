@@ -8,6 +8,9 @@
 
 #if iOS || macOS || os(tvOS) || os(visionOS)
 import SwiftUI
+#if iOS
+import Photos
+#endif
 
 extension RichTextCoordinator {
 
@@ -96,26 +99,99 @@ extension RichTextCoordinator {
     }
 
     func handleInsertImage() {
-        // Note: insertImage actions are primarily designed to work with
-        // UI components like RichTextAction.ImageButton that show PhotosPicker.
-        // For programmatic use, consider using pasteImage with image data instead.
-        #if iOS || os(visionOS)
-        if #available(iOS 16.0, visionOS 1.0, *) {
-            imagePickerManager.showImagePicker(for: .single, context: context)
-        }
+        #if iOS
+        presentImagePicker(for: .single)
         #endif
     }
 
     func handleInsertImages() {
-        // Note: insertImages actions are primarily designed to work with
-        // UI components like RichTextAction.ImageButton that show PhotosPicker.
-        // For programmatic use, consider using pasteImages with image data instead.
-        #if iOS || os(visionOS)
-        if #available(iOS 16.0, visionOS 1.0, *) {
-            imagePickerManager.showImagePicker(for: .multiple, context: context)
-        }
+        #if iOS
+        presentImagePicker(for: .multiple)
         #endif
     }
+    
+    #if iOS
+    private func presentImagePicker(for mode: RichTextImagePickerManager.InsertMode) {
+        // Request photo library permission first
+        requestPhotoLibraryPermission { [weak self] granted in
+            guard granted else { return }
+            self?.showImagePicker(for: mode)
+        }
+    }
+    
+    private func showImagePicker(for mode: RichTextImagePickerManager.InsertMode) {
+        // Configure the picker manager
+        imagePickerManager.configure(for: mode, context: context)
+        
+        // Get the hosting view controller from the text view
+        guard let viewController = textView.findViewController() else { return }
+        
+        // Create and present the image picker
+        let pickerViewController = RichTextImagePickerViewController(
+            manager: imagePickerManager,
+            context: context
+        )
+        
+        viewController.present(pickerViewController, animated: true)
+    }
+    
+    private func requestPhotoLibraryPermission(completion: @escaping (Bool) -> Void) {
+        let status = PHPhotoLibrary.authorizationStatus()
+        
+        switch status {
+        case .authorized, .limited:
+            // Already have permission
+            DispatchQueue.main.async {
+                completion(true)
+            }
+        case .notDetermined:
+            // Request permission
+            PHPhotoLibrary.requestAuthorization { newStatus in
+                DispatchQueue.main.async {
+                    completion(newStatus == .authorized || newStatus == .limited)
+                }
+            }
+        case .denied, .restricted:
+            // Permission denied - show alert with option to go to Settings
+            DispatchQueue.main.async {
+                self.showPhotoPermissionDeniedAlert {
+                    completion(false)
+                }
+            }
+        @unknown default:
+            DispatchQueue.main.async {
+                completion(false)
+            }
+        }
+    }
+    
+    private func showPhotoPermissionDeniedAlert(completion: @escaping () -> Void) {
+        guard let viewController = textView.findViewController() else {
+            completion()
+            return
+        }
+        
+        let alert = UIAlertController(
+            title: "Photo Access Required",
+            message: "To insert images, please allow access to your photo library in Settings.",
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in
+            completion()
+        })
+        
+        alert.addAction(UIAlertAction(title: "Settings", style: .default) { _ in
+            // Open app settings
+            if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(settingsURL)
+            }
+            completion()
+        })
+        
+        viewController.present(alert, animated: true)
+    }
+    #endif
 
     // TODO: This code should be handled by the component
     func setColor(_ color: RichTextColor, to val: ColorRepresentable) {

@@ -48,8 +48,8 @@ public struct RichTextInsertion<T: RichTextInsertable>: Hashable, Equatable {
 
 public extension RichTextInsertion {
 
-    /// The corresponding rich text action.
-    var action: RichTextAction? {
+    /// The corresponding rich text action for pasting.
+    var pasteAction: RichTextAction? {
         if let insertion = self as? RichTextInsertion<ImageRepresentable> {
             return .pasteImage(insertion)
         }
@@ -60,6 +60,22 @@ public extension RichTextInsertion {
             return .pasteText(insertion)
         }
         return nil
+    }
+
+    /// The corresponding rich text action for inserting.
+    var insertAction: RichTextAction? {
+        if self is RichTextInsertion<ImageRepresentable> {
+            return .insertImage
+        }
+        if self is RichTextInsertion<[ImageRepresentable]> {
+            return .insertImages
+        }
+        return nil
+    }
+
+    /// The corresponding rich text action (for backward compatibility).
+    var action: RichTextAction? {
+        pasteAction
     }
 }
 

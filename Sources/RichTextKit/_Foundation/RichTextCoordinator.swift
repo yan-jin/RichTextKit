@@ -56,6 +56,8 @@ open class RichTextCoordinator: NSObject {
     /// This set is used to store context observations.
     public var cancellables = Set<AnyCancellable>()
 
+    public let imagePickerManager = RichTextImagePickerManager()
+
     /// This flag is used to avoid delaying context sync.
     var shouldDelaySyncContextWithTextView = true
 
