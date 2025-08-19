@@ -115,6 +115,12 @@ public struct RichTextEditor: ViewRepresentable {
         textView.setup(with: text.wrappedValue, format: format)
         textView.configuration = config
         textView.theme = style
+        textView.inputAccessoryView = nil
+        
+        // Hide the system input assistant (predictive text bar)
+        textView.inputAssistantItem.leadingBarButtonGroups = []
+        textView.inputAssistantItem.trailingBarButtonGroups = []
+        
         viewConfiguration(textView)
         return textView
     }

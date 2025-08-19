@@ -8,6 +8,9 @@
 
 #if iOS || macOS || os(visionOS)
 import SwiftUI
+#if iOS
+import PhotosUI
+#endif
 
 /**
  This toolbar can be added above an iOS keyboard, to provide
@@ -99,6 +102,9 @@ public struct RichTextKeyboardToolbar<LeadingButtons: View, TrailingButtons: Vie
 
     @State
     private var isFormatSheetPresented = false
+
+    @State
+    private var isPhotosPickerPresented = false
 
     @Environment(\.horizontalSizeClass)
     private var horizontalSizeClass
@@ -226,12 +232,18 @@ private extension RichTextKeyboardToolbar {
     
     @ViewBuilder
     var centerViews: some View {
+        
         if config.displayFormatSheetButton {
            Button(action: presentFormatSheet) {
                Image.richTextFormat
                    .contentShape(Rectangle())
            }
            .conditionalGlassEffect(id: "toolbar", namespace: namespace)
+        }
+        
+        if #available(iOS 16.0, *) {
+            PhotosPickerButton(context: context)
+                .conditionalGlassEffect(id: "toolbar", namespace: namespace)
         }
         
         // Custom style toggle stack with glass effect on individual toggles
@@ -319,6 +331,54 @@ private extension RichTextKeyboardToolbar {
         isFormatSheetPresented = true
     }
 }
+
+#if iOS
+@available(iOS 16.0, *)
+private struct PhotosPickerButton: View {
+    let context: RichTextContext
+    
+    @State private var selectedPhotoItems: [PhotosPickerItem] = []
+    @State private var isPhotosPickerPresented = false
+    
+    var body: some View {
+        Button(action: { isPhotosPickerPresented = true }) {
+            Image.richTextInsertImage
+                .contentShape(Rectangle())
+        }
+        .photosPicker(
+            isPresented: $isPhotosPickerPresented,
+            selection: $selectedPhotoItems,
+            maxSelectionCount: 1,
+            matching: .images,
+            photoLibrary: .shared()
+        )
+        .onChange(of: selectedPhotoItems) { items in
+            handleSelectedPhotos(items)
+        }
+    }
+    
+    private func handleSelectedPhotos(_ items: [PhotosPickerItem]) {
+        guard !items.isEmpty else { return }
+        
+        Task {
+            for item in items {
+                if let data = try? await item.loadTransferable(type: Data.self),
+                   let image = ImageRepresentable(data: data) {
+                    await MainActor.run {
+                        let index = context.selectedRange.location
+                        let insertion = RichTextInsertion<ImageRepresentable>.image(image, at: index, moveCursor: true)
+                        context.handle(.pasteImage(insertion))
+                    }
+                }
+            }
+            
+            await MainActor.run {
+                selectedPhotoItems.removeAll()
+            }
+        }
+    }
+}
+#endif
 
 #Preview {
 

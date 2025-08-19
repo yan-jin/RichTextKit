@@ -140,28 +140,18 @@ extension RichTextCoordinator {
         
         switch status {
         case .authorized, .limited:
-            // Already have permission
-            DispatchQueue.main.async {
-                completion(true)
-            }
+            completion(true)
         case .notDetermined:
             // Request permission
             PHPhotoLibrary.requestAuthorization { newStatus in
-                DispatchQueue.main.async {
-                    completion(newStatus == .authorized || newStatus == .limited)
-                }
+                completion(newStatus == .authorized || newStatus == .limited)
             }
         case .denied, .restricted:
-            // Permission denied - show alert with option to go to Settings
-            DispatchQueue.main.async {
-                self.showPhotoPermissionDeniedAlert {
-                    completion(false)
-                }
-            }
-        @unknown default:
-            DispatchQueue.main.async {
+            self.showPhotoPermissionDeniedAlert {
                 completion(false)
             }
+        @unknown default:
+            completion(false)
         }
     }
     

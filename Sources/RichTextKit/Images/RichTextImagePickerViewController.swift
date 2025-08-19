@@ -33,12 +33,6 @@ class RichTextImagePickerViewController: UIImagePickerController {
         mediaTypes = ["public.image"]
         allowsEditing = false
         delegate = self
-        
-        // Configure for multiple selection if needed
-        if manager.insertMode == .multiple {
-            // Note: UIImagePickerController doesn't support multiple selection natively
-            // We'll handle single selection for now
-        }
     }
 }
 
