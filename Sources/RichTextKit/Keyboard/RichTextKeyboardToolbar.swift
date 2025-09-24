@@ -195,7 +195,7 @@ private extension RichTextKeyboardToolbar {
                     context: context,
                     fillVertically: true
                 )
-                .padding(EdgeInsets(top: 15, leading: 15, bottom: 15, trailing: 15))
+                .padding(EdgeInsets(top: 15, leading: 10, bottom: 15, trailing: 0))
                 .frame(maxHeight: .infinity)
                 .conditionalGlassEffect(id: "toolbar", namespace: namespace)
             }
@@ -208,16 +208,31 @@ private extension RichTextKeyboardToolbar {
                    Image.richTextFormat
                        .contentShape(Rectangle())
                }
-               .padding(EdgeInsets(top: 15, leading: 15, bottom: 15, trailing: 15))
+               .padding(EdgeInsets(top: 15, leading: 10, bottom: 15, trailing: 10))
                .conditionalGlassEffect(id: "toolbar", namespace: namespace)
             }
             
             if #available(iOS 16.0, *) {
                 PhotosPickerButton(context: context)
-                    .padding(EdgeInsets(top: 15, leading: 15, bottom: 15, trailing: 15))
+                    .padding(EdgeInsets(top: 15, leading: 10, bottom: 15, trailing: 10))
                     .conditionalGlassEffect(id: "toolbar", namespace: namespace)
             }
         }
+        
+        /*
+        HStack(spacing: 0) {
+            ForEach(RichTextStyle.allCases) { style in
+                RichTextStyle.Toggle(
+                    style: style,
+                    context: context,
+                    fillVertically: true
+                )
+                .padding(EdgeInsets(top: 10, leading: 0, bottom: 10, trailing: 10))
+                .conditionalGlassEffect(id: "toolbar", namespace: namespace)
+            }
+        }
+        .fixedSize(horizontal: false, vertical: true)
+         */
     }
 }
 
@@ -320,7 +335,7 @@ private struct PhotosPickerButton: View {
         var body: some View {
             VStack(spacing: 0) {
                 RichTextEditor(text: $text, context: context)
-                    .background(Color.white)
+                    .background(Color.black)
                     .cornerRadius(10)
                     .padding()
                     .background(Color.gray.ignoresSafeArea())
@@ -331,7 +346,7 @@ private struct PhotosPickerButton: View {
             }
             .richTextKeyboardToolbarConfig(.init(
                 alwaysDisplayToolbar: false,
-                actions: [.dismissKeyboard, .print]
+                actions: [.dismissKeyboard]
             ))
         }
     }
