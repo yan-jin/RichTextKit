@@ -31,8 +31,7 @@ import PhotosUI
  Instead, add this toolbar below a ``RichTextEditor`` to let
  it automatically show when the text editor is edited in iOS.
 
- You can inject additional leading and trailing buttons, and
- customize the format sheet that is presented when users tap
+ You can customize the format sheet that is presented when users tap
  format button:
 
  ```swift
@@ -40,16 +39,10 @@ import PhotosUI
     RichTextEditor(...)
     RichTextKeyboardToolbar(
         context: context,
-        leadingButtons: {},
-        trailingButtons: {},
         formatSheet: { $0 }
     )
  }
  ```
-
- These view builders provide you with standard views. Return
- `$0` to use these standard views, or return any custom view
- that you want to use instead.
 
  You can configure and style the view by applying its config
  and style view modifiers to your view hierarchy:
@@ -66,35 +59,25 @@ import PhotosUI
  For more information, see ``RichTextKeyboardToolbarConfig``
  and ``RichTextKeyboardToolbarStyle``.
  */
-public struct RichTextKeyboardToolbar<LeadingButtons: View, TrailingButtons: View, FormatSheet: View>: View {
+public struct RichTextKeyboardToolbar<FormatSheet: View>: View {
 
     /**
      Create a rich text keyboard toolbar.
 
      - Parameters:
        - context: The context to affect.
-       - leadingButtons: The leading buttons to place after the leading actions.
-       - trailingButtons: The trailing buttons to place before the trailing actions.
        - formatSheet: The rich text format sheet to use, by default ``RichTextFormat/Sheet``.
      */
     public init(
         context: RichTextContext,
-        @ViewBuilder leadingButtons: @escaping (StandardLeadingButtons) -> LeadingButtons,
-        @ViewBuilder trailingButtons: @escaping (StandardTrailingButtons) -> TrailingButtons,
         @ViewBuilder formatSheet: @escaping (StandardFormatSheet) -> FormatSheet
     ) {
         self._context = ObservedObject(wrappedValue: context)
-        self.leadingButtons = leadingButtons
-        self.trailingButtons = trailingButtons
         self.formatSheet = formatSheet
     }
 
-    public typealias StandardLeadingButtons = EmptyView
-    public typealias StandardTrailingButtons = EmptyView
     public typealias StandardFormatSheet = RichTextFormat.Sheet
 
-    private let leadingButtons: (StandardLeadingButtons) -> LeadingButtons
-    private let trailingButtons: (StandardTrailingButtons) -> TrailingButtons
     private let formatSheet: (StandardFormatSheet) -> FormatSheet
 
     @ObservedObject
@@ -121,9 +104,7 @@ public struct RichTextKeyboardToolbar<LeadingButtons: View, TrailingButtons: Vie
         if #available(iOS 26.0, *) {
             GlassEffectContainer(spacing: 10.0) {
                 HStack(spacing: style.itemSpacing) {
-                    leadingViews
-                    centerViews
-                    trailingViews
+                    unifiedToolbarViews
                 }
             }
             .environment(\.sizeCategory, .medium)
@@ -150,9 +131,7 @@ public struct RichTextKeyboardToolbar<LeadingButtons: View, TrailingButtons: Vie
         } else {
             VStack(spacing: 0) {
                 HStack(spacing: style.itemSpacing) {
-                    leadingViews
-                    centerViews
-                    trailingViews
+                    unifiedToolbarViews
                 }
                 .padding(10)
             }
@@ -206,15 +185,11 @@ private extension RichTextKeyboardToolbar {
 
 private extension RichTextKeyboardToolbar {
 
-    var divider: some View {
-        Divider()
-            .frame(height: 25)
-    }
-
     @ViewBuilder
-    var leadingViews: some View {
+    var unifiedToolbarViews: some View {
+        // All actions
         HStack(spacing: 0) {
-            ForEach(config.leadingActions) { action in
+            ForEach(config.actions) { action in
                 RichTextAction.Button(
                     action: action,
                     context: context,
@@ -226,60 +201,23 @@ private extension RichTextKeyboardToolbar {
             }
         }
         .fixedSize(horizontal: false, vertical: true)
-
-        leadingButtons(StandardLeadingButtons())
-    }
-    
-    @ViewBuilder
-    var centerViews: some View {
-        
-        if config.displayFormatSheetButton {
-           Button(action: presentFormatSheet) {
-               Image.richTextFormat
-                   .contentShape(Rectangle())
-           }
-           .padding(EdgeInsets(top: 15, leading: 15, bottom: 15, trailing: 15))
-           .conditionalGlassEffect(id: "toolbar", namespace: namespace)
-        }
-        
-        if #available(iOS 16.0, *) {
-            PhotosPickerButton(context: context)
-                .padding(EdgeInsets(top: 15, leading: 15, bottom: 15, trailing: 15))
-                .conditionalGlassEffect(id: "toolbar", namespace: namespace)
-        }
-    }
-
-    @ViewBuilder
-    var trailingViews: some View {
-        /*
-        Picker(
-            forValue: \.alignment,
-            in: context
-        ) {
-            Text(RTKL10n.textAlignment.text)
-        } valueLabel: {
-            $0.defaultLabel
-        }
-        .pickerStyle(.segmented)
-        .frame(maxWidth: 200)
-        .keyboardShortcutsOnly(if: isCompact)
-         */
-
-        trailingButtons(StandardTrailingButtons())
-
+                
         HStack(spacing: 0) {
-            ForEach(config.trailingActions) { action in
-                RichTextAction.Button(
-                    action: action,
-                    context: context,
-                    fillVertically: true
-                )
-                .padding(EdgeInsets(top: 15, leading: 15, bottom: 15, trailing: 15))
-                .frame(maxHeight: .infinity)
-                .conditionalGlassEffect(id: "toolbar", namespace: namespace)
+            if config.displayFormatSheetButton {
+               Button(action: presentFormatSheet) {
+                   Image.richTextFormat
+                       .contentShape(Rectangle())
+               }
+               .padding(EdgeInsets(top: 15, leading: 15, bottom: 15, trailing: 15))
+               .conditionalGlassEffect(id: "toolbar", namespace: namespace)
+            }
+            
+            if #available(iOS 16.0, *) {
+                PhotosPickerButton(context: context)
+                    .padding(EdgeInsets(top: 15, leading: 15, bottom: 15, trailing: 15))
+                    .conditionalGlassEffect(id: "toolbar", namespace: namespace)
             }
         }
-        .fixedSize(horizontal: false, vertical: true)
     }
 }
 
@@ -388,15 +326,12 @@ private struct PhotosPickerButton: View {
                     .background(Color.gray.ignoresSafeArea())
                 RichTextKeyboardToolbar(
                     context: context,
-                    leadingButtons: {_ in },
-                    trailingButtons: {_ in },
                     formatSheet: { $0 }
                 )
             }
             .richTextKeyboardToolbarConfig(.init(
                 alwaysDisplayToolbar: false,
-                leadingActions: [],
-                trailingActions: [.dismissKeyboard, .print]
+                actions: [.dismissKeyboard, .print]
             ))
         }
     }

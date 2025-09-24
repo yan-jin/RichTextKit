@@ -17,17 +17,14 @@ public struct RichTextKeyboardToolbarConfig {
     /// - Parameters:
     ///   - alwaysDisplayToolbar: Whether or not to always show the toolbar, by default `false`.
     ///   - displayFormatSheetButton: Whether to show the format sheet button, by default `true`.
-    ///   - leadingActions: The leading actions, by default `.undo` and `.redo`.
-    ///   - trailingActions: The trailing actions, by default `.dismissKeyboard`.
+    ///   - actions: The toolbar actions, by default `.undo`, `.redo`, and `.dismissKeyboard`.
     public init(
         alwaysDisplayToolbar: Bool = false,
         displayFormatSheetButton: Bool = true,
-        leadingActions: [RichTextAction] = [.undo, .redo],
-        trailingActions: [RichTextAction] = [.dismissKeyboard]) {
+        actions: [RichTextAction] = [.undo, .redo, .dismissKeyboard]) {
         self.alwaysDisplayToolbar = alwaysDisplayToolbar
         self.displayFormatSheetButton = displayFormatSheetButton
-        self.leadingActions = leadingActions
-        self.trailingActions = trailingActions
+        self.actions = actions
     }
 
     /// Whether or not to always show the toolbar.
@@ -36,11 +33,8 @@ public struct RichTextKeyboardToolbarConfig {
     /// Whether to display the format sheet button.
     public var displayFormatSheetButton: Bool
 
-    /// The leading toolbar actions.
-    public var leadingActions: [RichTextAction]
-
-    /// The trailing toolbar actions.
-    public var trailingActions: [RichTextAction]
+    /// The toolbar actions.
+    public var actions: [RichTextAction]
 }
 
 public extension RichTextKeyboardToolbarConfig {
