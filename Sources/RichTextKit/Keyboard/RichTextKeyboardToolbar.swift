@@ -119,7 +119,7 @@ public struct RichTextKeyboardToolbar<LeadingButtons: View, TrailingButtons: Vie
 
     public var body: some View {
         if #available(iOS 26.0, *) {
-            GlassEffectContainer(spacing: 20.0) {
+            GlassEffectContainer(spacing: 10.0) {
                 HStack(spacing: style.itemSpacing) {
                     leadingViews
                     centerViews
@@ -213,14 +213,14 @@ private extension RichTextKeyboardToolbar {
 
     @ViewBuilder
     var leadingViews: some View {
-        HStack(spacing: style.itemSpacing) {
+        HStack(spacing: 0) {
             ForEach(config.leadingActions) { action in
                 RichTextAction.Button(
                     action: action,
                     context: context,
                     fillVertically: true
                 )
-                .padding()
+                .padding(EdgeInsets(top: 15, leading: 15, bottom: 15, trailing: 15))
                 .frame(maxHeight: .infinity)
                 .conditionalGlassEffect(id: "toolbar", namespace: namespace)
             }
@@ -238,27 +238,15 @@ private extension RichTextKeyboardToolbar {
                Image.richTextFormat
                    .contentShape(Rectangle())
            }
+           .padding(EdgeInsets(top: 15, leading: 15, bottom: 15, trailing: 15))
            .conditionalGlassEffect(id: "toolbar", namespace: namespace)
         }
         
         if #available(iOS 16.0, *) {
             PhotosPickerButton(context: context)
+                .padding(EdgeInsets(top: 15, leading: 15, bottom: 15, trailing: 15))
                 .conditionalGlassEffect(id: "toolbar", namespace: namespace)
         }
-        
-        // Custom style toggle stack with glass effect on individual toggles
-        HStack(spacing: 5) {
-            ForEach(RichTextStyle.allCases) { style in
-                RichTextStyle.Toggle(
-                    style: style,
-                    context: context,
-                    fillVertically: true
-                )
-                .conditionalGlassEffect(id: "toolbar", namespace: namespace)
-            }
-        }
-        .fixedSize(horizontal: false, vertical: true)
-        .keyboardShortcutsOnly(if: isCompact)
     }
 
     @ViewBuilder
@@ -279,13 +267,14 @@ private extension RichTextKeyboardToolbar {
 
         trailingButtons(StandardTrailingButtons())
 
-        HStack(spacing: style.itemSpacing) {
+        HStack(spacing: 0) {
             ForEach(config.trailingActions) { action in
                 RichTextAction.Button(
                     action: action,
                     context: context,
                     fillVertically: true
                 )
+                .padding(EdgeInsets(top: 15, leading: 15, bottom: 15, trailing: 15))
                 .frame(maxHeight: .infinity)
                 .conditionalGlassEffect(id: "toolbar", namespace: namespace)
             }
@@ -399,15 +388,15 @@ private struct PhotosPickerButton: View {
                     .background(Color.gray.ignoresSafeArea())
                 RichTextKeyboardToolbar(
                     context: context,
-                    leadingButtons: { _ in Color.red },
-                    trailingButtons: { _ in Color.green},
+                    leadingButtons: {_ in },
+                    trailingButtons: {_ in },
                     formatSheet: { $0 }
                 )
             }
             .richTextKeyboardToolbarConfig(.init(
                 alwaysDisplayToolbar: false,
-                leadingActions: [.print],
-                trailingActions: [.print]
+                leadingActions: [],
+                trailingActions: [.dismissKeyboard, .print]
             ))
         }
     }

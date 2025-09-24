@@ -21,7 +21,7 @@ public struct RichTextKeyboardToolbarStyle {
     ///   - shadowRadius: The toolbar's shadow radius, by default `3`.
     public init(
         toolbarHeight: Double = 50,
-        itemSpacing: Double = 15,
+        itemSpacing: Double = 10,
         shadowColor: Color = .black.opacity(0.1),
         shadowRadius: Double = 3
     ) {
