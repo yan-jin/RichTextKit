@@ -6,7 +6,7 @@ let package = Package(
     name: "RichTextKit",
     defaultLocalization: "en",
     platforms: [
-        .iOS(.v15),
+        .iOS("26.0"),
         .macOS(.v12),
         .tvOS(.v15),
         .watchOS(.v8),
